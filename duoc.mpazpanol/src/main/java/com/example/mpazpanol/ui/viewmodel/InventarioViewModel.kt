@@ -3,7 +3,7 @@ package com.example.mpazpanol.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.mpazpanol.data.model.Equipo
+import com.example.mpazpanol.model.Equipo
 import com.example.mpazpanol.data.repository.EquipoRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

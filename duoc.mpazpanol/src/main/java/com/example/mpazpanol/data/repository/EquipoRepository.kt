@@ -1,7 +1,7 @@
 package com.example.mpazpanol.data.repository
 
 import com.example.mpazpanol.data.dao.EquipoDao
-import com.example.mpazpanol.data.model.Equipo
+import com.example.mpazpanol.model.Equipo
 import kotlinx.coroutines.flow.Flow
 
 /**

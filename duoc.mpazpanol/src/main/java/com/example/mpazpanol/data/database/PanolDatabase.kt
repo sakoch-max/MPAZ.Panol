@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.mpazpanol.data.dao.EquipoDao
-import com.example.mpazpanol.data.model.Equipo
+import com.example.mpazpanol.model.Equipo
 
 /**
  * Room Database singleton for MPAZ Pañol.

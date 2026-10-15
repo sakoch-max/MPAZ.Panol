@@ -1,4 +1,4 @@
-package com.example.mpazpanol.data.model
+package com.example.mpazpanol.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

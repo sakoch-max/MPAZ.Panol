@@ -7,7 +7,7 @@ import java.util.Locale
 
 object ValidadorFechas {
 
-    /** Esta parte valida que la reserva se realice con al menos 3 horas de anticipación */
+    // Esta parte valida que la reserva se realice con al menos 3 horas de anticipacion
 
     fun cumpleAnticipacionMinima(fechaHoraReserva: String): Boolean {
         return try {
@@ -16,7 +16,7 @@ object ValidadorFechas {
             val fechaObjetivo = Calendar.getInstance().apply { time = fechaObjetivoDate }
             val ahora = Calendar.getInstance()
 
-            // Sumar 3 horas a la fecha actual para comparar si la reserva es al menos 3 horas después
+            // Sumar 3 horas a la fecha actual para comparar si la reserva es al menos 3 horas despues
             ahora.add(Calendar.HOUR_OF_DAY, 3)
 
             // Retorna true si fechaObjetivo es posterior o igual a (ahora + 3 horas)

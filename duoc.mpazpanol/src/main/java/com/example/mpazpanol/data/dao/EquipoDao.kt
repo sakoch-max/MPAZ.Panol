@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.mpazpanol.data.model.Equipo
+import com.example.mpazpanol.model.Equipo
 import kotlinx.coroutines.flow.Flow
 
 /**

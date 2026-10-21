@@ -6,13 +6,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Room
@@ -24,7 +27,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mpazpanol.model.Docente
 import com.example.mpazpanol.model.Equipo
+import com.example.mpazpanol.ui.components.EscuelaMarcelaPazLogo
+import com.example.mpazpanol.ui.viewmodel.DocenteViewModel
 import com.example.mpazpanol.ui.viewmodel.InventarioViewModel
 import com.example.mpazpanol.ui.viewmodel.TicketViewModel
 import com.example.mpazpanol.utils.NotificationHelper
@@ -34,13 +40,15 @@ import com.example.mpazpanol.utils.NotificationHelper
 fun ConsolaAdminScreen(
     navController: NavController,
     ticketViewModel: TicketViewModel,
-    inventarioViewModel: InventarioViewModel
+    inventarioViewModel: InventarioViewModel,
+    docenteViewModel: DocenteViewModel
 ) {
     val context = LocalContext.current
     val tickets by ticketViewModel.todosLosTickets.collectAsState(initial = emptyList())
     val equipos by inventarioViewModel.equipos.collectAsState()
+    val docentes by docenteViewModel.docentes.collectAsState()
 
-    var pestanaSeleccionada by remember { mutableIntStateOf(0) } // 0: Resumen, 1: Solicitudes, 2: Inventario
+    var pestanaSeleccionada by remember { mutableIntStateOf(0) } // 0: Resumen, 1: Solicitudes, 2: Inventario, 3: Docentes
 
     var ticketARechazar by remember { mutableStateOf<Int?>(null) }
     var justificacion by remember { mutableStateOf("") }
@@ -58,6 +66,13 @@ fun ConsolaAdminScreen(
 
     var equipoAEliminar by remember { mutableStateOf<Equipo?>(null) }
     var filtroEstadoTicket by remember { mutableStateOf("Todas") }
+
+    // Estado Formulario Registrar Docente
+    var mostrarModalAgregarDocente by remember { mutableStateOf(false) }
+    var nuevoNombreDocente by remember { mutableStateOf("") }
+    var nuevoCorreoDocente by remember { mutableStateOf("") }
+    var nuevoRutDocente by remember { mutableStateOf("") }
+    var docenteAEliminar by remember { mutableStateOf<Docente?>(null) }
 
     // Modal Rechazar Solicitud
     if (ticketARechazar != null) {
@@ -269,12 +284,120 @@ fun ConsolaAdminScreen(
         )
     }
 
+    // Modal Registrar Nuevo Docente Autorizado
+    if (mostrarModalAgregarDocente) {
+        AlertDialog(
+            onDismissRequest = { mostrarModalAgregarDocente = false },
+            title = { Text("Registrar Nuevo Docente Autorizado", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Solo los docentes registrados por el Administrador TI podrán iniciar sesión en la app:",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    OutlinedTextField(
+                        value = nuevoNombreDocente,
+                        onValueChange = { nuevoNombreDocente = it },
+                        label = { Text("Nombre Completo") },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = nuevoCorreoDocente,
+                        onValueChange = { nuevoCorreoDocente = it },
+                        label = { Text("Correo Institucional (ej: profe@marcelapaz.cl)") },
+                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = nuevoRutDocente,
+                        onValueChange = { nuevoRutDocente = it },
+                        label = { Text("RUT (Opcional)") },
+                        leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val correoStr = nuevoCorreoDocente.trim().lowercase()
+                        val nombreStr = nuevoNombreDocente.trim()
+
+                        if (!com.example.mpazpanol.utils.ValidadorEntradas.esNombreValido(nombreStr)) {
+                            Toast.makeText(context, "El nombre del docente no debe contener números ni estar vacío", Toast.LENGTH_LONG).show()
+                            return@Button
+                        }
+
+                        if (!com.example.mpazpanol.utils.ValidadorEntradas.esCorreoValido(correoStr)) {
+                            Toast.makeText(context, "Ingrese un formato de correo institucional válido", Toast.LENGTH_LONG).show()
+                            return@Button
+                        }
+
+                        val nuevoDocente = Docente(
+                            nombre = nombreStr,
+                            correo = correoStr,
+                            rut = nuevoRutDocente.trim()
+                        )
+                        docenteViewModel.registrarDocente(nuevoDocente) {
+                            Toast.makeText(context, "Docente registrado con éxito", Toast.LENGTH_SHORT).show()
+                            mostrarModalAgregarDocente = false
+                            nuevoNombreDocente = ""
+                            nuevoCorreoDocente = ""
+                            nuevoRutDocente = ""
+                        }
+                    }
+                ) {
+                    Text("Registrar Docente")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarModalAgregarDocente = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // Modal Eliminar Docente
+    if (docenteAEliminar != null) {
+        AlertDialog(
+            onDismissRequest = { docenteAEliminar = null },
+            title = { Text("Desactivar Cuenta Docente") },
+            text = { Text("¿Desea revocar el acceso de '${docenteAEliminar?.nombre}' (${docenteAEliminar?.correo})?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        docenteAEliminar?.let { docenteViewModel.eliminarDocente(it.id) }
+                        Toast.makeText(context, "Acceso de docente revocado", Toast.LENGTH_SHORT).show()
+                        docenteAEliminar = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Revocar Acceso")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { docenteAEliminar = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        com.example.mpazpanol.ui.components.EscuelaMarcelaPazLogo(size = 36.dp, showSubtitle = false)
+                        EscuelaMarcelaPazLogo(size = 36.dp, showSubtitle = false)
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text("Consola Administrador TI", fontWeight = FontWeight.Bold)
@@ -297,6 +420,13 @@ fun ConsolaAdminScreen(
                     onClick = { mostrarModalAgregarEquipo = true },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     text = { Text("Nuevo Equipo") },
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            } else if (pestanaSeleccionada == 3) {
+                ExtendedFloatingActionButton(
+                    onClick = { mostrarModalAgregarDocente = true },
+                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                    text = { Text("Nuevo Docente") },
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             }
@@ -324,8 +454,14 @@ fun ConsolaAdminScreen(
                 Tab(
                     selected = pestanaSeleccionada == 2,
                     onClick = { pestanaSeleccionada = 2 },
-                    text = { Text("Inventario (${equipos.size})") },
+                    text = { Text("Stock (${equipos.size})") },
                     icon = { Icon(Icons.Default.Inventory, contentDescription = null) }
+                )
+                Tab(
+                    selected = pestanaSeleccionada == 3,
+                    onClick = { pestanaSeleccionada = 3 },
+                    text = { Text("Docentes (${docentes.size})") },
+                    icon = { Icon(Icons.Default.People, contentDescription = null) }
                 )
             }
 
@@ -415,6 +551,33 @@ fun ConsolaAdminScreen(
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(aceptadasCount.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                                         Text("Reservas Aprobadas", style = MaterialTheme.typography.bodySmall)
+                                    }
+                                }
+                            }
+                        }
+
+                        item {
+                            ElevatedCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.elevatedCardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text(
+                                        "Docentes Autorizados (${docentes.size})",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        "Solo los correos registrados en la pestaña 'Docentes' podrán ingresar al sistema.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Button(onClick = { pestanaSeleccionada = 3 }) {
+                                        Text("Gestionar Cuentas Docentes")
                                     }
                                 }
                             }
@@ -699,6 +862,115 @@ fun ConsolaAdminScreen(
                                             Icon(Icons.Default.Edit, contentDescription = "Editar Stock", modifier = Modifier.size(16.dp))
                                             Spacer(modifier = Modifier.width(4.dp))
                                             Text("Editar Stock")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                3 -> {
+                    // Pestaña Gestión de Cuentas Docentes
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        ElevatedCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            colors = CardDefaults.elevatedCardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    "Control de Acceso Institucional",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    "Solo los docentes con correos registrados en esta lista podrán iniciar sesión en la aplicación.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+
+                        if (docentes.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "No hay docentes autorizados registrados",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                items(
+                                    items = docentes,
+                                    key = { it.id }
+                                ) { docente ->
+                                    ElevatedCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = MaterialTheme.shapes.medium
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Surface(
+                                                shape = MaterialTheme.shapes.small,
+                                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                                modifier = Modifier.size(44.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(
+                                                        Icons.Default.Person,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                    )
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.width(16.dp))
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    docente.nombre,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    docente.correo,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                if (docente.rut.isNotBlank()) {
+                                                    Text(
+                                                        "RUT: ${docente.rut}",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                }
+                                            }
+
+                                            IconButton(onClick = { docenteAEliminar = docente }) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = "Revocar Acceso",
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
                                         }
                                     }
                                 }

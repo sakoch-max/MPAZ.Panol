@@ -334,8 +334,8 @@ fun CarritoScreen(navController: NavController, viewModel: TicketViewModel) {
 
             Button(
                 onClick = {
-                    if (sala.isBlank()) {
-                        Toast.makeText(context, "Por favor ingrese la sala de uso", Toast.LENGTH_SHORT).show()
+                    if (!com.example.mpazpanol.utils.ValidadorEntradas.esSalaValida(sala)) {
+                        Toast.makeText(context, "Por favor ingrese una sala o laboratorio de uso válido", Toast.LENGTH_SHORT).show()
                         return@Button
                     }
                     if (carrito.isEmpty()) {

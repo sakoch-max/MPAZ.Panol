@@ -28,6 +28,7 @@ import com.example.mpazpanol.ui.screens.carrito.CarritoScreen
 import com.example.mpazpanol.ui.screens.catalogo.CatalogoScreen
 import com.example.mpazpanol.ui.screens.configuracion.ConfiguracionScreen
 import com.example.mpazpanol.ui.screens.login.LoginScreen
+import com.example.mpazpanol.ui.viewmodel.DocenteViewModel
 import com.example.mpazpanol.ui.viewmodel.InventarioViewModel
 import com.example.mpazpanol.ui.viewmodel.TicketViewModel
 
@@ -42,6 +43,7 @@ data class BottomNavItem(
 fun AppNavigation(
     inventarioViewModel: InventarioViewModel,
     ticketViewModel: TicketViewModel,
+    docenteViewModel: DocenteViewModel,
     isDarkTheme: Boolean,
     onToggleDarkTheme: (Boolean) -> Unit,
     esAdmin: Boolean,
@@ -152,12 +154,13 @@ fun AppNavigation(
             composable("login") {
                 LoginScreen(
                     navController = navController,
-                    onLoginAsAdmin = onLoginAsAdmin
+                    onLoginAsAdmin = onLoginAsAdmin,
+                    docenteViewModel = docenteViewModel
                 )
             }
             composable("catalogo") { CatalogoScreen(navController, inventarioViewModel, ticketViewModel) }
             composable("carrito") { CarritoScreen(navController, ticketViewModel) }
-            composable("admin") { ConsolaAdminScreen(navController, ticketViewModel, inventarioViewModel) }
+            composable("admin") { ConsolaAdminScreen(navController, ticketViewModel, inventarioViewModel, docenteViewModel) }
             composable("configuracion") {
                 ConfiguracionScreen(
                     navController = navController,

@@ -104,4 +104,25 @@ object InventarioMock {
             ubicacion = "Gabinete B1"
         )
     )
+
+    val docentesIniciales = listOf(
+        com.example.mpazpanol.model.Docente(
+            id = 1,
+            nombre = "Docente Demo Marcela Paz",
+            correo = "docente@marcelapaz.cl",
+            rut = "12.345.678-9"
+        ),
+        com.example.mpazpanol.model.Docente(
+            id = 2,
+            nombre = "Profesor Juan Pérez",
+            correo = "jperez@marcelapaz.cl",
+            rut = "15.678.901-2"
+        ),
+        com.example.mpazpanol.model.Docente(
+            id = 3,
+            nombre = "Profesora María González",
+            correo = "mgonzalez@marcelapaz.cl",
+            rut = "14.234.567-8"
+        )
+    )
 }

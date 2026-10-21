@@ -1,12 +1,10 @@
-# Add project specific R8 rules here.
-# AGP will combine all keep rule files in src/main/keepRules to pass to R8
-#
-# For more details, see
-#   https://d.android.com/r/tools/r8/keep-rules
+# R8 / Proguard rules for MPAZ Pañol TI
+# Preservar entidades de Room y modelos de datos
+-keep class com.example.mpazpanol.model.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Preservar DAOs y Base de Datos Room
+-keep class com.example.mpazpanol.data.dao.** { *; }
+-keep class com.example.mpazpanol.data.database.** { *; }
+
+# Mantener atributos de reflexión, anotaciones y clases internas requeridas por KSP / Room
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod

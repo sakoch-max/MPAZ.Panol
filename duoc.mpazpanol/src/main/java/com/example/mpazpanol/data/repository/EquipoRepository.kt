@@ -22,4 +22,8 @@ class EquipoRepository(private val equipoDao: EquipoDao) {
     suspend fun update(equipo: Equipo) {
         equipoDao.updateEquipo(equipo)
     }
+
+    suspend fun delete(equipo: Equipo) {
+        equipoDao.deleteEquipo(equipo)
+    }
 }

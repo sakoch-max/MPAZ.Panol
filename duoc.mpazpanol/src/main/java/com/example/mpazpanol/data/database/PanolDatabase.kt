@@ -17,8 +17,7 @@ import kotlinx.coroutines.launch
 /**
  * Room Database singleton for MPAZ Pañol.
  */
-// Agregamos Ticket: class a las entidades de la base de datos
-@Database(entities = [Equipo::class, Ticket::class], version = 1, exportSchema = false)
+@Database(entities = [Equipo::class, Ticket::class], version = 2, exportSchema = false)
 abstract class PanolDatabase : RoomDatabase() {
 
     abstract fun EquipoDao(): EquipoDao
@@ -35,11 +34,20 @@ abstract class PanolDatabase : RoomDatabase() {
                     PanolDatabase::class.java,
                     "panol_database"
                 )
-
+                    .fallbackToDestructiveMigration(true)
                     .addCallback(object : RoomDatabase.Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
-                            // Esto evita que la pantalla se congele mientras se cargan los datos
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val dao = INSTANCE?.EquipoDao()
+                                InventarioMock.equiposIniciales.forEach { equipo ->
+                                    dao?.insertEquipo(equipo)
+                                }
+                            }
+                        }
+
+                        override fun onOpen(db: SupportSQLiteDatabase) {
+                            super.onOpen(db)
                             CoroutineScope(Dispatchers.IO).launch {
                                 val dao = INSTANCE?.EquipoDao()
                                 InventarioMock.equiposIniciales.forEach { equipo ->
@@ -48,8 +56,7 @@ abstract class PanolDatabase : RoomDatabase() {
                             }
                         }
                     })
-
-                    .build() // El build() ahora queda al final
+                    .build()
 
                 INSTANCE = instance
                 instance

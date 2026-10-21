@@ -3,6 +3,7 @@ package com.example.mpazpanol.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.mpazpanol.data.repository.EquipoRepository
 import com.example.mpazpanol.data.repository.TicketRepository
 import com.example.mpazpanol.model.Equipo
 import com.example.mpazpanol.model.Ticket
@@ -13,7 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class TicketViewModel(private val repository: TicketRepository) : ViewModel() {
+class TicketViewModel(
+    private val repository: TicketRepository,
+    private val equipoRepository: EquipoRepository,
+) : ViewModel() {
 
     val todosLosTickets: Flow<List<Ticket>> = repository.allTickets
 
@@ -77,7 +81,15 @@ class TicketViewModel(private val repository: TicketRepository) : ViewModel() {
         if (ValidadorFechas.cumpleAnticipacionMinima(fechaHoraPlanificada)) {
             _mensajeError.value = null
             viewModelScope.launch {
+                // 1. Descontar el stock en la base de datos para cada equipo en el carrito
+                _carrito.value.forEach { (equipo, cantidad) ->
+                    val nuevoStockDisponibilidad = (equipo.stockDisponible - cantidad).coerceAtLeast(0)
+                    val equipoActualizado = equipo.copy(stockDisponible = nuevoStockDisponibilidad)
+                    equipoRepository.update(equipoActualizado)
+                }
+                // 2. Insertar ticket de reserva
                 repository.insert(ticket)
+                // 3. Vaciar el carrito
                 vaciarCarrito()
                 onSuccess()
             }
@@ -90,11 +102,14 @@ class TicketViewModel(private val repository: TicketRepository) : ViewModel() {
         _mensajeError.value = null
     }
 
-    class Factory(private val repository: TicketRepository) : ViewModelProvider.Factory {
+    class Factory(
+        private val repository: TicketRepository,
+        private val equipoRepository: EquipoRepository
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(TicketViewModel::class.java)) {
-                return TicketViewModel(repository) as T
+                return TicketViewModel(repository, equipoRepository) as T
             }
             throw IllegalArgumentException("Clase ViewModel desconocida")
         }

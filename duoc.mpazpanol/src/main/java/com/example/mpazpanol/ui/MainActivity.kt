@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
             InventarioViewModel.Factory(equipoRepository)
         }
         val ticketViewModel: TicketViewModel by viewModels {
-            TicketViewModel.Factory(ticketRepository)
+            TicketViewModel.Factory(ticketRepository, equipoRepository)
         }
 
         setContent {

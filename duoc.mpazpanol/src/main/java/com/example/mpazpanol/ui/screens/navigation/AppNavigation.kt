@@ -124,7 +124,7 @@ fun AppNavigation(
             composable("login") { LoginScreen(navController) }
             composable("catalogo") { CatalogoScreen(navController, inventarioViewModel, ticketViewModel) }
             composable("carrito") { CarritoScreen(navController, ticketViewModel) }
-            composable("admin") { ConsolaAdminScreen(navController, ticketViewModel) }
+            composable("admin") { ConsolaAdminScreen(navController, ticketViewModel, inventarioViewModel) }
             composable("configuracion") {
                 ConfiguracionScreen(
                     navController = navController,

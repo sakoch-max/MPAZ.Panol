@@ -49,7 +49,7 @@ abstract class PanolDatabase : RoomDatabase() {
                         }
                     })
 
-                    .build() // El build() ahora queda al final
+                    .build()
 
                 INSTANCE = instance
                 instance

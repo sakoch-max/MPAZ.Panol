@@ -41,38 +41,52 @@ fun AppNavigation(
     inventarioViewModel: InventarioViewModel,
     ticketViewModel: TicketViewModel,
     isDarkTheme: Boolean,
-    onToggleDarkTheme: (Boolean) -> Unit
+    onToggleDarkTheme: (Boolean) -> Unit,
+    esAdmin: Boolean,
+    onLoginAsAdmin: (Boolean) -> Unit
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val navItems = listOf(
-        BottomNavItem(
-            route = "catalogo",
-            title = "Catálogo",
-            selectedIcon = Icons.Filled.Home,
-            unselectedIcon = Icons.Outlined.Home
-        ),
-        BottomNavItem(
-            route = "carrito",
-            title = "Reservas",
-            selectedIcon = Icons.Filled.ShoppingCart,
-            unselectedIcon = Icons.Outlined.ShoppingCart
-        ),
-        BottomNavItem(
-            route = "admin",
-            title = "Admin",
-            selectedIcon = Icons.Filled.AdminPanelSettings,
-            unselectedIcon = Icons.Outlined.AdminPanelSettings
-        ),
-        BottomNavItem(
-            route = "configuracion",
-            title = "Ajustes",
-            selectedIcon = Icons.Filled.Settings,
-            unselectedIcon = Icons.Outlined.Settings
+    // Menús según el rol del usuario (Docente vs Administrador TI)
+    val navItems = if (esAdmin) {
+        listOf(
+            BottomNavItem(
+                route = "admin",
+                title = "Panel Admin",
+                selectedIcon = Icons.Filled.AdminPanelSettings,
+                unselectedIcon = Icons.Outlined.AdminPanelSettings
+            ),
+            BottomNavItem(
+                route = "configuracion",
+                title = "Ajustes",
+                selectedIcon = Icons.Filled.Settings,
+                unselectedIcon = Icons.Outlined.Settings
+            )
         )
-    )
+    } else {
+        listOf(
+            BottomNavItem(
+                route = "catalogo",
+                title = "Catálogo",
+                selectedIcon = Icons.Filled.Home,
+                unselectedIcon = Icons.Outlined.Home
+            ),
+            BottomNavItem(
+                route = "carrito",
+                title = "Reservas",
+                selectedIcon = Icons.Filled.ShoppingCart,
+                unselectedIcon = Icons.Outlined.ShoppingCart
+            ),
+            BottomNavItem(
+                route = "configuracion",
+                title = "Ajustes",
+                selectedIcon = Icons.Filled.Settings,
+                unselectedIcon = Icons.Outlined.Settings
+            )
+        )
+    }
 
     val showBottomBar = currentRoute != "login" && currentRoute != null
 
@@ -121,7 +135,12 @@ fun AppNavigation(
             startDestination = "login",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("login") { LoginScreen(navController) }
+            composable("login") {
+                LoginScreen(
+                    navController = navController,
+                    onLoginAsAdmin = onLoginAsAdmin
+                )
+            }
             composable("catalogo") { CatalogoScreen(navController, inventarioViewModel, ticketViewModel) }
             composable("carrito") { CarritoScreen(navController, ticketViewModel) }
             composable("admin") { ConsolaAdminScreen(navController, ticketViewModel, inventarioViewModel) }

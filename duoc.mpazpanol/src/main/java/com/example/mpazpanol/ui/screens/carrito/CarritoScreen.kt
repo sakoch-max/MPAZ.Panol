@@ -148,13 +148,17 @@ fun CarritoScreen(navController: NavController, viewModel: TicketViewModel) {
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text("Mi Carrito y Reserva", fontWeight = FontWeight.Bold)
-                        Text(
-                            "Escuela Marcela Paz — Pañol TI",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        com.example.mpazpanol.ui.components.EscuelaMarcelaPazLogo(size = 36.dp, showSubtitle = false)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text("Mi Carrito y Reserva", fontWeight = FontWeight.Bold)
+                            Text(
+                                "Colegio Escritora Marcela Paz E-764",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -221,7 +225,10 @@ fun CarritoScreen(navController: NavController, viewModel: TicketViewModel) {
                         .heightIn(max = 220.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(carrito.entries.toList()) { (equipo, cantidad) ->
+                    items(
+                        items = carrito.entries.toList(),
+                        key = { entry -> entry.key.id }
+                    ) { (equipo, cantidad) ->
                         Card(
                             modifier = Modifier.fillMaxWidth()
                         ) {

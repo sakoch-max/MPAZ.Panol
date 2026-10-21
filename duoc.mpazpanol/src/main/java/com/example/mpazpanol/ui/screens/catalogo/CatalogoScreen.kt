@@ -10,16 +10,22 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.Laptop
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mpazpanol.ui.components.EscuelaMarcelaPazLogo
 import com.example.mpazpanol.ui.viewmodel.InventarioViewModel
 import com.example.mpazpanol.ui.viewmodel.TicketViewModel
 
@@ -28,7 +34,7 @@ import com.example.mpazpanol.ui.viewmodel.TicketViewModel
 fun CatalogoScreen(
     navController: NavController,
     inventarioViewModel: InventarioViewModel,
-    ticketViewModel: TicketViewModel
+    ticketViewModel: TicketViewModel,
 ) {
     val catalogo by inventarioViewModel.equipos.collectAsState()
     val carrito by ticketViewModel.carrito.collectAsState()
@@ -47,13 +53,17 @@ fun CatalogoScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text("Catálogo de Equipos", fontWeight = FontWeight.Bold)
-                        Text(
-                            "Escuela Marcela Paz — Pañol TI",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        EscuelaMarcelaPazLogo(size = 36.dp, showSubtitle = false)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text("Catálogo de Equipos", fontWeight = FontWeight.Bold)
+                            Text(
+                                "Colegio Escritora Marcela Paz E-764",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -111,67 +121,98 @@ fun CatalogoScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(equiposFiltrados) { equipo ->
+                items(
+                    items = equiposFiltrados,
+                    key = { it.id }
+                ) { equipo ->
                     val cantidadEnCarrito = carrito[equipo] ?: 0
 
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth(),
                         shape = MaterialTheme.shapes.medium
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(16.dp)
                         ) {
-                            Surface(
-                                shape = MaterialTheme.shapes.small,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier.size(48.dp)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        Icons.Default.Devices,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                val iconCategoria: ImageVector = when (equipo.categoria.lowercase()) {
+                                    "audiovisual", "proyector" -> Icons.Default.Tv
+                                    "computación", "notebook" -> Icons.Default.Laptop
+                                    "robótica" -> Icons.Default.Memory
+                                    "redes" -> Icons.Default.Router
+                                    else -> Icons.Default.Devices
+                                }
+
+                                Surface(
+                                    shape = MaterialTheme.shapes.small,
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    modifier = Modifier.size(52.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            iconCategoria,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        equipo.nombre,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
                                     )
+
+                                    Spacer(modifier = Modifier.height(2.dp))
+
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            Icons.Default.Category,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(14.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            "${equipo.categoria} • Ubicación: ${equipo.ubicacion}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
 
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            Column(modifier = Modifier.weight(1f)) {
+                            if (equipo.descripcion.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(10.dp))
                                 Text(
-                                    equipo.nombre,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
+                                    text = equipo.descripcion,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                            }
 
-                                Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        Icons.Default.Category,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(14.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        equipo.categoria,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(6.dp))
-
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 val disponible = equipo.stockDisponible > 0
                                 SuggestionChip(
                                     onClick = { },
                                     label = {
                                         Text(
-                                            if (disponible) "Stock: ${equipo.stockDisponible}" else "Agotado",
+                                            if (disponible) "Stock Disponible: ${equipo.stockDisponible}" else "Agotado",
                                             fontWeight = FontWeight.SemiBold
                                         )
                                     },
@@ -200,55 +241,55 @@ fun CatalogoScreen(
                                         }
                                     )
                                 )
-                            }
 
-                            // Botones de agregar al carrito
-                            if (equipo.stockDisponible > 0) {
-                                if (cantidadEnCarrito > 0) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        FilledIconButton(
-                                            onClick = { ticketViewModel.decrementarDelCarrito(equipo) },
-                                            modifier = Modifier.size(32.dp),
-                                            colors = IconButtonDefaults.filledIconButtonColors(
-                                                containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                            )
+                                // Botones de agregar al carrito
+                                if (equipo.stockDisponible > 0) {
+                                    if (cantidadEnCarrito > 0) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
-                                            Icon(
-                                                Icons.Default.Remove,
-                                                contentDescription = "Quitar uno",
-                                                modifier = Modifier.size(16.dp)
+                                            FilledIconButton(
+                                                onClick = { ticketViewModel.decrementarDelCarrito(equipo) },
+                                                modifier = Modifier.size(32.dp),
+                                                colors = IconButtonDefaults.filledIconButtonColors(
+                                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                                )
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Remove,
+                                                    contentDescription = "Quitar uno",
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+
+                                            Text(
+                                                text = cantidadEnCarrito.toString(),
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(horizontal = 4.dp)
                                             )
+
+                                            FilledIconButton(
+                                                onClick = { ticketViewModel.agregarAlCarrito(equipo) },
+                                                modifier = Modifier.size(32.dp),
+                                                enabled = cantidadEnCarrito < equipo.stockDisponible
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Add,
+                                                    contentDescription = "Agregar otro",
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
                                         }
-
-                                        Text(
-                                            text = "$cantidadEnCarrito",
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.padding(horizontal = 4.dp)
-                                        )
-
-                                        FilledIconButton(
+                                    } else {
+                                        Button(
                                             onClick = { ticketViewModel.agregarAlCarrito(equipo) },
-                                            modifier = Modifier.size(32.dp),
-                                            enabled = cantidadEnCarrito < equipo.stockDisponible
+                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                                         ) {
-                                            Icon(
-                                                Icons.Default.Add,
-                                                contentDescription = "Agregar otro",
-                                                modifier = Modifier.size(16.dp)
-                                            )
+                                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text("Añadir")
                                         }
-                                    }
-                                } else {
-                                    Button(
-                                        onClick = { ticketViewModel.agregarAlCarrito(equipo) },
-                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                                    ) {
-                                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Añadir")
                                     }
                                 }
                             }

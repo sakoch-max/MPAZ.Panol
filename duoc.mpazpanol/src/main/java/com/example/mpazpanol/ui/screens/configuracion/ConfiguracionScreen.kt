@@ -1,5 +1,9 @@
 package com.example.mpazpanol.ui.screens.configuracion
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -8,7 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mpazpanol.ui.components.EscuelaMarcelaPazLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,8 +29,13 @@ fun ConfiguracionScreen(
     isDarkTheme: Boolean,
     onToggleDarkTheme: (Boolean) -> Unit,
 ) {
-    var notificacionesActivas by remember { mutableStateOf(true) }
+    var notificacionesActivas by remember { mutableStateOf(false) }
     var vibracionActiva by remember { mutableStateOf(true) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { _ -> }
+    )
 
     Scaffold(
         topBar = {
@@ -46,7 +55,7 @@ fun ConfiguracionScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Tarjeta de Perfil
+            // Tarjeta de Perfil con el Logo del Colegio
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.elevatedCardColors(
@@ -59,20 +68,7 @@ fun ConfiguracionScreen(
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Surface(
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(52.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
-                    }
+                    EscuelaMarcelaPazLogo(size = 56.dp)
 
                     Spacer(modifier = Modifier.width(16.dp))
 
@@ -88,7 +84,7 @@ fun ConfiguracionScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Escuela Marcela Paz",
+                            text = "Colegio Escritora Marcela Paz E-764",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -167,7 +163,13 @@ fun ConfiguracionScreen(
                         }
                         Switch(
                             checked = notificacionesActivas,
-                            onCheckedChange = { notificacionesActivas = it }
+                            onCheckedChange = { activado ->
+                                notificacionesActivas = activado
+                                if (activado && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    // Lanza la ventana emergente nativa de Android 13+
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                            }
                         )
                     }
 
@@ -221,9 +223,9 @@ fun ConfiguracionScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
-                        Text("Pañol Escuela Marcela Paz", style = MaterialTheme.typography.bodyLarge)
+                        Text("Pañol Colegio Escritora Marcela Paz", style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            "Versión 1.0.0 — Sistema de Gestión TI",
+                            "Versión 1.0.0 — San Bernardo",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

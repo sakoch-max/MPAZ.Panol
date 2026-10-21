@@ -36,13 +36,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var isDarkTheme by remember { mutableStateOf(false) }
+            var esAdmin by remember { mutableStateOf(false) }
 
             MpazPanolTheme(darkTheme = isDarkTheme) {
                 AppNavigation(
                     inventarioViewModel = inventarioViewModel,
                     ticketViewModel = ticketViewModel,
                     isDarkTheme = isDarkTheme,
-                    onToggleDarkTheme = { isDarkTheme = it }
+                    onToggleDarkTheme = { isDarkTheme = it },
+                    esAdmin = esAdmin,
+                    onLoginAsAdmin = { esAdmin = it }
                 )
             }
         }

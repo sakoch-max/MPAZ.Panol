@@ -11,6 +11,8 @@ data class Equipo(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val nombre: String,
+    val descripcion: String = "",
+    val imagenUrl: String = "",
     val categoria: String,
     val stockTotal: Int,
     val stockDisponible: Int,

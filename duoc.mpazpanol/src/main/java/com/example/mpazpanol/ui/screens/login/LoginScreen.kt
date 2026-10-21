@@ -3,7 +3,6 @@ package com.example.mpazpanol.ui.screens.login
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,9 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mpazpanol.ui.components.EscuelaMarcelaPazLogo
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    navController: NavController,
+    onLoginAsAdmin: (Boolean) -> Unit,
+) {
     var usuario by remember { mutableStateOf("") }
     var error by remember { mutableStateOf(false) }
 
@@ -37,37 +40,19 @@ fun LoginScreen(navController: NavController) {
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.size(64.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.School,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
-                }
+                // Emblema original del Colegio Escritora Marcela Paz E-764
+                EscuelaMarcelaPazLogo(size = 96.dp)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "MPAZ Pañol TI",
-                    style = MaterialTheme.typography.headlineMedium,
+                    text = "Sistema Pañol TI",
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Text(
-                    text = "Escuela Marcela Paz",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 OutlinedTextField(
                     value = usuario,
@@ -94,11 +79,14 @@ fun LoginScreen(navController: NavController) {
 
                 Button(
                     onClick = {
-                        if (usuario.isBlank()) {
+                        val input = usuario.trim().lowercase()
+                        if (input.isBlank()) {
                             error = true
-                        } else if (usuario.trim().lowercase() == "admin") {
+                        } else if (input == "admin") {
+                            onLoginAsAdmin(true)
                             navController.navigate("admin")
                         } else {
+                            onLoginAsAdmin(false)
                             navController.navigate("catalogo")
                         }
                     },

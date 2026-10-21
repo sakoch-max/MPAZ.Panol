@@ -1,6 +1,7 @@
 package com.example.mpazpanol.data.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -25,4 +26,7 @@ interface EquipoDao {
 
     @Update
     suspend fun updateEquipo(equipo: Equipo)
+
+    @Delete
+    suspend fun deleteEquipo(equipo: Equipo)
 }

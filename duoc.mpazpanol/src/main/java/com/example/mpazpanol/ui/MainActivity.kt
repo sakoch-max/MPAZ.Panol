@@ -1,5 +1,3 @@
-@file:Suppress("UNUSED_VARIABLE", "UNUSED_PROPERTY", "unused")
-
 package com.example.mpazpanol.ui
 
 import android.os.Bundle
@@ -9,7 +7,8 @@ import androidx.activity.viewModels
 import com.example.mpazpanol.data.database.PanolDatabase
 import com.example.mpazpanol.data.repository.EquipoRepository
 import com.example.mpazpanol.data.repository.TicketRepository
-import com.example.mpazpanol.ui.theme.MyApplicationTheme
+import com.example.mpazpanol.ui.screens.navigation.AppNavigation
+import com.example.mpazpanol.ui.theme.MpazPanolTheme
 import com.example.mpazpanol.ui.viewmodel.InventarioViewModel
 import com.example.mpazpanol.ui.viewmodel.TicketViewModel
 
@@ -32,9 +31,11 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            MyApplicationTheme {
-                // Aqui va el mNavHost de Compose que hiciste luci
-                // Pasale ViewModels a tus pantallas.
+            MpazPanolTheme {
+                AppNavigation(
+                    inventarioViewModel = inventarioViewModel,
+                    ticketViewModel = ticketViewModel
+                )
             }
         }
     }

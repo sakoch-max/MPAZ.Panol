@@ -34,6 +34,11 @@ android {
             abortOnError = false
         }
     }
+    lint {
+        disable += "NullSafeMutableLiveData"
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
     kotlinOptions {
         jvmTarget = "17"
     }

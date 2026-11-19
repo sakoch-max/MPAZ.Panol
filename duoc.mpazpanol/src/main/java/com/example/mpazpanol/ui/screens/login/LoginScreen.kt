@@ -5,28 +5,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mpazpanol.ui.components.EscuelaMarcelaPazLogo
-import com.example.mpazpanol.ui.viewmodel.DocenteViewModel
-import com.example.mpazpanol.utils.ValidadorEntradas
-import kotlinx.coroutines.launch
+import com.example.mpazpanol.ui.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
     navController: NavController,
     onLoginAsAdmin: (Boolean) -> Unit,
-    docenteViewModel: DocenteViewModel,
+    loginViewModel: LoginViewModel,
 ) {
-    var usuario by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf(false) }
-    var mensajeErrorCustom by remember { mutableStateOf<String?>(null) }
-    var cargando by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+    val uiState by loginViewModel.uiState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -47,7 +43,6 @@ fun LoginScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Emblema original del Colegio Escritora Marcela Paz E-764
                 EscuelaMarcelaPazLogo(size = 96.dp)
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -62,24 +57,20 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 OutlinedTextField(
-                    value = usuario,
-                    onValueChange = {
-                        usuario = it
-                        error = false
-                        mensajeErrorCustom = null
-                    },
+                    value = uiState.usuario,
+                    onValueChange = { loginViewModel.onUsuarioChange(it) },
                     label = { Text("Correo Institucional") },
                     leadingIcon = {
                         Icon(Icons.Default.Email, contentDescription = null)
                     },
-                    isError = error,
+                    isError = uiState.isError,
                     trailingIcon = {
-                        if (error) Icon(Icons.Default.Warning, contentDescription = "Error")
+                        if (uiState.isError) Icon(Icons.Default.Warning, contentDescription = "Error")
                     },
                     supportingText = {
-                        if (error) {
+                        if (uiState.isError) {
                             Text(
-                                mensajeErrorCustom ?: "El correo o usuario no puede estar vacío",
+                                uiState.mensajeError ?: "El correo o usuario no puede estar vacío",
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
@@ -92,43 +83,21 @@ fun LoginScreen(
 
                 Button(
                     onClick = {
-                        val input = usuario.trim().lowercase()
-                        if (input.isBlank()) {
-                            error = true
-                            mensajeErrorCustom = "El campo no puede estar vacío"
-                            return@Button
-                        }
-
-                        if (input == "admin") {
-                            onLoginAsAdmin(true)
-                            navController.navigate("admin")
-                        } else {
-                            if (!ValidadorEntradas.esCorreoValido(input)) {
-                                error = true
-                                mensajeErrorCustom = "Ingrese un formato de correo válido (ej: docente@marcelapaz.cl)"
-                                return@Button
-                            }
-
-                            cargando = true
-                            scope.launch {
-                                val autorizado = docenteViewModel.esCorreoAutorizado(input)
-                                cargando = false
-                                if (autorizado) {
-                                    onLoginAsAdmin(false)
-                                    navController.navigate("catalogo")
-                                } else {
-                                    error = true
-                                    mensajeErrorCustom = "El correo '$input' no está autorizado por el Administrador del colegio."
-                                }
+                        loginViewModel.iniciarSesion { esAdmin ->
+                            onLoginAsAdmin(esAdmin)
+                            if (esAdmin) {
+                                navController.navigate("admin")
+                            } else {
+                                navController.navigate("catalogo")
                             }
                         }
                     },
-                    enabled = !cargando,
+                    enabled = !uiState.cargando,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
                 ) {
-                    if (cargando) {
+                    if (uiState.cargando) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             color = MaterialTheme.colorScheme.onPrimary,

@@ -30,6 +30,7 @@ import com.example.mpazpanol.ui.screens.configuracion.ConfiguracionScreen
 import com.example.mpazpanol.ui.screens.login.LoginScreen
 import com.example.mpazpanol.ui.viewmodel.DocenteViewModel
 import com.example.mpazpanol.ui.viewmodel.InventarioViewModel
+import com.example.mpazpanol.ui.viewmodel.LoginViewModel
 import com.example.mpazpanol.ui.viewmodel.TicketViewModel
 
 data class BottomNavItem(
@@ -47,7 +48,8 @@ fun AppNavigation(
     isDarkTheme: Boolean,
     onToggleDarkTheme: (Boolean) -> Unit,
     esAdmin: Boolean,
-    onLoginAsAdmin: (Boolean) -> Unit
+    onLoginAsAdmin: (Boolean) -> Unit,
+    loginViewModel: LoginViewModel
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -155,7 +157,7 @@ fun AppNavigation(
                 LoginScreen(
                     navController = navController,
                     onLoginAsAdmin = onLoginAsAdmin,
-                    docenteViewModel = docenteViewModel
+                    loginViewModel = loginViewModel
                 )
             }
             composable("catalogo") { CatalogoScreen(navController, inventarioViewModel, ticketViewModel) }

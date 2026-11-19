@@ -16,6 +16,7 @@ import com.example.mpazpanol.ui.screens.navigation.AppNavigation
 import com.example.mpazpanol.ui.theme.MpazPanolTheme
 import com.example.mpazpanol.ui.viewmodel.DocenteViewModel
 import com.example.mpazpanol.ui.viewmodel.InventarioViewModel
+import com.example.mpazpanol.ui.viewmodel.LoginViewModel
 import com.example.mpazpanol.ui.viewmodel.TicketViewModel
 
 class MainActivity : ComponentActivity() {
@@ -39,6 +40,9 @@ class MainActivity : ComponentActivity() {
         val docenteViewModel: DocenteViewModel by viewModels {
             DocenteViewModel.Factory(docenteRepository)
         }
+        val loginViewModel: LoginViewModel by viewModels {
+            LoginViewModel.Factory(docenteRepository)
+        }
 
         setContent {
             var isDarkTheme by remember { mutableStateOf(false) }
@@ -49,6 +53,7 @@ class MainActivity : ComponentActivity() {
                     inventarioViewModel = inventarioViewModel,
                     ticketViewModel = ticketViewModel,
                     docenteViewModel = docenteViewModel,
+                    loginViewModel = loginViewModel,
                     isDarkTheme = isDarkTheme,
                     onToggleDarkTheme = { isDarkTheme = it },
                     esAdmin = esAdmin,
